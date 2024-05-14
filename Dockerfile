@@ -1,6 +1,6 @@
 # Use the appropriate ASP.NET image
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8 AS builder
-
+#FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8 AS builder
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
 # # Set the work directory
 # WORKDIR /app
 
