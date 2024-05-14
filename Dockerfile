@@ -1,6 +1,6 @@
 # Use the appropriate ASP.NET image
-#FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8 AS builder
-FROM FROM mcr.microsoft.com/dotnet/framework/sdk:4.8 as build
+#FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8 AS builder \
+FROM mcr.microsoft.com/dotnet/framework/sdk:4.8 as build
 # # Set the work directory
 # WORKDIR /app
 
