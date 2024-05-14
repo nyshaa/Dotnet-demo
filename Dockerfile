@@ -1,28 +1,14 @@
-# Use the appropriate ASP.NET image
-#FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8 AS builder \
-FROM mcr.microsoft.com/dotnet/framework/sdk:4.8 as build
-# # Set the work directory
-# WORKDIR /app
+FROM golang:nanoserver as gobuild
 
-# COPY . .
+COPY . /code
+WORKDIR /code
 
-# # Restore NuGet packages (adjust path to the .sln or .csproj as necessary)
-# RUN nuget restore WebAppNetFramwork.sln
+RUN go build webserver.go
 
-# # Build the project using MSBuild (adjust path as necessary)
-# RUN msbuild WebAppNetFramwork.sln /p:Configuration=Release
+FROM mcr.microsoft.com/windows/nanoserver:sac2016
 
-# # Final image
-# FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8
+COPY --from=gobuild /code/webserver.exe /webserver.exe
 
-# # Set the work directory in the new image
-# WORKDIR /inetpub/wwwroot
+EXPOSE 8080
 
-# # Copy the built application from the builder image
-# COPY --from=builder /app/YourProject/bin/Release/Publish/ .
-
-# # Expose port (adjust if different)
-# EXPOSE 80
-
-# # Set the entry point for the container
-# ENTRYPOINT ["C:\\ServiceMonitor.exe", "w3svc"]
+CMD ["\\webserver.exe"]
