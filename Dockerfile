@@ -5,7 +5,7 @@ WORKDIR /code
 
 RUN go build webserver.go
 
-FROM mcr.microsoft.com/windows/nanoserver:sac2019
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2019
 
 COPY --from=gobuild /code/webserver.exe /webserver.exe
 
