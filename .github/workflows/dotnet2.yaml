@@ -30,3 +30,11 @@ jobs:
     - name: Push Docker image to Amazon ECR
       run: |
         docker push 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
+
+    - name: Deploy to Amazon ECS
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: windows1-revision1.json
+        service: window1
+        cluster: fargate
+        wait-for-service-stability: true
