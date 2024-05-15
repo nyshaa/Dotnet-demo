@@ -38,3 +38,4 @@ jobs:
         service: window1
         cluster: fargate
         wait-for-service-stability: true
+        region: ${{ secrets.AWS_REGION }}
