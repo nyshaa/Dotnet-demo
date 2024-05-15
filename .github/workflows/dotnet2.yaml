@@ -29,7 +29,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build .\taskapp\taskapp\Dockerfile -t 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
+        docker build --file=taskapp/taskapp/Dockerfile -t 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
 
     - name: Push Docker image to Amazon ECR
       run: |
