@@ -10,8 +10,8 @@ on:
 
 jobs:
   build_and_push:
-    #runs-on: windows-latest  # This workflow will run on a Windows runner
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # This workflow will run on a Windows runner
+    #runs-on: ubuntu-latest
 
     permissions:
       contents: read
@@ -20,14 +20,14 @@ jobs:
       statuses: write
 
     steps:
-    # - name: Check out the repository
-    #   uses: actions/checkout@v3
+    - name: Check out the repository
+      uses: actions/checkout@v3
 
-    - name: Super-linter
-      uses: super-linter/super-linter@v6.5.0  # x-release-please-version
-      env:
-        # To report GitHub Actions status checks
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Super-linter
+    #   uses: super-linter/super-linter@v6.5.0  # x-release-please-version
+    #   env:
+    #     # To report GitHub Actions status checks
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -40,13 +40,13 @@ jobs:
       run: |
         aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 973905176396.dkr.ecr.us-west-2.amazonaws.com
 
-    # - name: Build Docker image
-    #   run: |
-    #     docker build . -t 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
+    - name: Build Docker image
+      run: |
+        docker build . -t 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
 
-    # - name: Push Docker image to Amazon ECR
-    #   run: |
-    #     docker push 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
+    - name: Push Docker image to Amazon ECR
+      run: |
+        docker push 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
 
     # - name: Deploy to Amazon ECS
     #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1

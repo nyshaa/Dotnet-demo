@@ -1,21 +1,47 @@
-# Set the base image
-FROM mcr.microsoft.com/dotnet/framework/sdk:4.8 as build
-WORKDIR "/src"
+FROM microsoft/iis:windowsservercore
 
-# Copy packages to your image and restore them
-COPY taskapp/taskapp.sln .
-COPY taskapp/taskapp/taskapp.csproj taskapp/taskapp/taskapp.csproj
-COPY taskapp/taskapp/packages.config taskapp/taskapp/packages.config
-RUN nuget restore taskapp/taskapp/packages.config -PackagesDirectory taskapp/packages
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-# Add files from source to the current directory and publish the deployment files to the folder profile
-COPY . .
-WORKDIR /src/taskapp/taskapp
-RUN msbuild taskapp.csproj /p:Configuration=Release /m /p:DeployOnBuild=true /p:PublishProfile=FolderProfile
+WORKDIR /Users/ContainerAdministrator/Downloads
 
-# Layer the production runtime image
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019 as deploy
+# Visual C++ 2015 Redistributable
+RUN Invoke-WebRequest 'https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe' -OutFile 'vc_redist.x64.exe'; \
+    Start-Process '.\vc_redist.x64.exe' '/install /passive /norestart' -Wait; \
+    Remove-Item vc_redist.x64.exe;
 
-# Add the publish files into the right directory
-WORKDIR /inetpub/wwwroot
-COPY --from=build /src/taskapp/taskapp/bin/Release/Publish .
+# Install PHP
+RUN $download_page = Invoke-WebRequest -UseBasicParsing -Uri 'http://windows.php.net/download'; \
+    $re      = 'php-\d.+-nts.+x64\.zip$'; \
+    $url     = $download_page.links | ? href -match $re  | % href | select -First 1; \
+    $filename = $url.Substring(20); \
+    $checksums = Invoke-WebRequest -UseBasicParsing -Uri 'http://windows.php.net/downloads/releases/sha1sum.txt'; \
+    $sumpattern = '([0-9A-F]+)\s+'+$filename; \
+    $checksums.Content.Split(\"`n\") | Select-String -Pattern $sumpattern | %{ $sum = $_.Matches[0].Groups[1].Value.ToUpper() }; \
+    $fullurl = 'http://windows.php.net' + $url; \
+    Invoke-WebRequest -UseBasicParsing -Uri $fullurl -OutFile php.zip; \
+    if ((Get-FileHash php.zip -Algorithm sha1).Hash -ne $sum) {exit 1} ; \
+    Expand-Archive -Path php.zip -DestinationPath c:\php; \
+    [Environment]::SetEnvironmentVariable('PATH', $env:Path + ';C:\php', [EnvironmentVariableTarget]::Machine); \
+    $env:PATH = [Environment]::GetEnvironmentVariable('PATH', [EnvironmentVariableTarget]::Machine); \
+    Remove-Item php.zip; \
+    php --version;
+
+COPY stage/ /
+
+# Install Composer
+RUN Invoke-WebRequest 'https://getcomposer.org/installer' -OutFile 'composer-setup.php'; \
+    php composer-setup.php; \
+    mv composer.phar C:\php; \
+    Remove-Item composer-setup.php; \
+    composer about;
+
+# Configure IIS
+COPY config/ ./
+RUN .\configure_iis.ps1; \
+    Remove-Item configure_iis.ps1;
+
+# Expose the Site
+RUN New-WebSite -Name 'www' -PhysicalPath C:\www -Port 80
+
+# Change working directory to web root
+WORKDIR /www
