@@ -12,9 +12,22 @@ jobs:
   build_and_push:
     runs-on: windows-latest  # This workflow will run on a Windows runner
 
+    permissions:
+      contents: read
+      packages: read
+      # To report GitHub Actions status checks
+      statuses: write
+
     steps:
     - name: Check out the repository
       uses: actions/checkout@v3
+
+    - name: Super-linter
+      uses: super-linter/super-linter@v6.5.0  # x-release-please-version
+      env:
+        # To report GitHub Actions status checks
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -27,36 +40,21 @@ jobs:
       run: |
         aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 973905176396.dkr.ecr.us-west-2.amazonaws.com
 
-    - name: Build Docker image
-      run: |
-        docker build . -t 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
+    # - name: Build Docker image
+    #   run: |
+    #     docker build . -t 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
 
-    - name: Push Docker image to Amazon ECR
-      run: |
-        docker push 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
+    # - name: Push Docker image to Amazon ECR
+    #   run: |
+    #     docker push 973905176396.dkr.ecr.us-west-2.amazonaws.com/github-build:latest
 
-    - name: Deploy to Amazon ECS
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: windows1-revision1.json
-        service: window1
-        cluster: fargate
-        wait-for-service-stability: true
+    # - name: Deploy to Amazon ECS
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    #   with:
+    #     task-definition: windows1-revision1.json
+    #     service: window1
+    #     cluster: fargate
+    #     wait-for-service-stability: true
 
 
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '5.x'
-
-    - name: Install sqlpackage
-      run: |
-        Invoke-WebRequest -Uri https://aka.ms/sqlpackage-win -OutFile sqlpackage.zip
-        Expand-Archive -Path sqlpackage.zip -DestinationPath $env:ProgramFiles\SqlPackage
-        $env:Path += ";$env:ProgramFiles\SqlPackage"
-
-    - name: Deploy DACPAC to AWS RDS
-      env:
-        CONNECTION_STRING: "Server=database1.czuc8vh8sz9x.eu-north-1.rds.amazonaws.com;Database=database1;User Id=admin;Password=kuroky1234;"
-      run: |
-        sqlpackage /Action:Publish /SourceFile:./data.dacpac /TargetConnectionString:"Server=database1.czuc8vh8sz9x.eu-north-1.rds.amazonaws.com;Database=database1;User Id=admin;Password=kuroky1234;"
+  
