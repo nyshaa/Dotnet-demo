@@ -18,9 +18,7 @@ jobs:
         with:
           access_token: ${{ secrets.LINE_ACCESS_TOKEN }}          # LINE Access Token
           message: |
-            Issue is opened.
-            ${{ github.event.issue.number }}: ${{ github.event.issue.title }}
-            ${{ github.event.issue.html_url }}
+            Please review the application 
           
       - uses: trstringer/manual-approval@v1
         with:
