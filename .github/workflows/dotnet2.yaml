@@ -10,9 +10,7 @@ on:
 
 jobs:
 
-  
-
-  linter:
+  testing:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -24,8 +22,19 @@ jobs:
          # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2.3.0 # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/sonarcloud-scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          #projectBaseDir: my-custom-directory
+          args: >
+            -Dsonar.organization=nyshaa
+            -Dsonar.projectKey=nyshaa
+
+
   # build_and_push:
-  #   # needs: review
+  #   # needs: testing
   #   runs-on: windows-latest  # This workflow will run on a Windows runner
   #   #runs-on: ubuntu-latest
 
@@ -59,6 +68,7 @@ jobs:
   #         docker push 973905176396.dkr.ecr.eu-north-1.amazonaws.com/windows1:latest
 
   # deploy staging:
+  #   needs: build_and_push 
   #   runs-on: ubuntu-latest
   #   steps:
 
