@@ -30,7 +30,7 @@ jobs:
           #projectBaseDir: my-custom-directory
           args: >
             -Dsonar.organization=nyshaa
-            -Dsonar.projectKey=nyshaa
+            -Dsonar.projectKey=nyshaa_Dotnet-demo
 
 
   # build_and_push:
