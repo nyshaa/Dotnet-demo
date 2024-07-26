@@ -23,6 +23,17 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v3
 
+
+      - name: required-reviews
+        uses: theoremlp/required-reviews@v2
+        with:
+        # A valid GitHub token
+          github-token: 
+        # The name of the reviewing user (set this if providing a GitHub App authn token)
+          review-user: # optional
+        # Whether to post a review on the PR
+          post-review: # optional
+
       #- name: Super-linter
       #  uses: super-linter/super-linter@v6.5.0  # x-release-please-version
       #  env:
@@ -49,16 +60,7 @@ jobs:
           docker push 973905176396.dkr.ecr.eu-north-1.amazonaws.com/windows1:latest
 
 
-      - uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.TOKEN }}
-          approvers: nyshaa
-          minimum-approvals: 1
-          issue-title: "Deploying v1.3.5 to prod from staging"
-          issue-body: "Please approve or deny the deployment of version v1.3.5."
-          exclude-workflow-initiator-as-approver: false
-          additional-approved-words: ''
-          additional-denied-words: ''
+          
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
