@@ -10,72 +10,107 @@ on:
 
 jobs:
 
-  review:
+  
+
+  linter:
     runs-on: ubuntu-latest
-    steps:
-      - name: LINE Notify
-        uses: snow-actions/line-notify@v1.1.0
-        with:
-          access_token: ${{ secrets.LINE_ACCESS_TOKEN }}          # LINE Access Token
-          message: |
-            Please review the application 
-          
-      - uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: nyshaa
-          minimum-approvals: 1
-
-
-
-  build_and_push:
-    needs: review
-    runs-on: windows-latest  # This workflow will run on a Windows runner
-    #runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: read
-      # To report GitHub Actions status checks
-      statuses: write
-
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
 
+      - name: Super-linter
+        uses: super-linter/super-linter@v6.5.0  # x-release-please-version
+        env:
+         # To report GitHub Actions status checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      #- name: Super-linter
-      #  uses: super-linter/super-linter@v6.5.0  # x-release-please-version
-      #  env:
-      #    # To report GitHub Actions status checks
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # build_and_push:
+  #   # needs: review
+  #   runs-on: windows-latest  # This workflow will run on a Windows runner
+  #   #runs-on: ubuntu-latest
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1
+  #   permissions:
+  #     contents: read
+  #     packages: read
+  #     # To report GitHub Actions status checks
+  #     statuses: write
 
-      - name: Log in to Amazon ECR
-        run: |
-          aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 973905176396.dkr.ecr.eu-north-1.amazonaws.com
+  #   steps:
+  #     - name: Check out the repository
+  #       uses: actions/checkout@v3
 
-      - name: Build Docker image
-        run: |
-          docker build . -t 973905176396.dkr.ecr.eu-north-1.amazonaws.com/windows1:latest
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: eu-north-1
 
-      - name: Push Docker image to Amazon ECR
-        run: |
-          docker push 973905176396.dkr.ecr.eu-north-1.amazonaws.com/windows1:latest
+  #     - name: Log in to Amazon ECR
+  #       run: |
+  #         aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 973905176396.dkr.ecr.eu-north-1.amazonaws.com
+
+  #     - name: Build Docker image
+  #       run: |
+  #         docker build . -t 973905176396.dkr.ecr.eu-north-1.amazonaws.com/windows1:latest
+
+  #     - name: Push Docker image to Amazon ECR
+  #       run: |
+  #         docker push 973905176396.dkr.ecr.eu-north-1.amazonaws.com/windows1:latest
+
+  # deploy staging:
+  #   runs-on: ubuntu-latest
+  #   steps:
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: eu-north-1
+
+  #     - name: Deploy to Amazon ECS
+  #       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #       with:
+  #         task-definition: windows1-revision1.json
+  #         service: window1
+  #         cluster: fargate
+  #         wait-for-service-stability: true
 
 
+  # review:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: LINE Notify
+  #       uses: snow-actions/line-notify@v1.1.0
+  #       with:
+  #         access_token: ${{ secrets.LINE_ACCESS_TOKEN }}          # LINE Access Token
+  #         message: |
+  #           Please review the application 
           
+  #     - uses: trstringer/manual-approval@v1
+  #       with:
+  #         secret: ${{ secrets.GITHUB_TOKEN }}
+  #         approvers: nyshaa
+  #         minimum-approvals: 1
 
-      - name: Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: windows1-revision1.json
-          service: window1
-          cluster: fargate
-          wait-for-service-stability: true
+
+  # deploy production:
+  #   needs: review
+  #   runs-on: ubuntu-latest
+  #   steps:
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: eu-north-1
+
+  #     - name: Deploy to Amazon ECS
+  #       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #       with:
+  #         task-definition: windows1-revision1.json
+  #         service: window1
+  #         cluster: fargate
+  #         wait-for-service-stability: true
