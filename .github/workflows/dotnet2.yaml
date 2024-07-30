@@ -18,11 +18,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - name: Super-linter
-      #   uses: super-linter/super-linter@v6.5.0  # x-release-please-version
-      #   env:
-      #    # To report GitHub Actions status checks
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Super-linter
+        uses: super-linter/super-linter@v6.5.0  # x-release-please-version
+        env:
+         # To report GitHub Actions status checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2.3.0 # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/sonarcloud-scan
@@ -90,21 +90,21 @@ jobs:
   #         wait-for-service-stability: true
 
 
-  # review:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: LINE Notify
-  #       uses: snow-actions/line-notify@v1.1.0
-  #       with:
-  #         access_token: ${{ secrets.LINE_ACCESS_TOKEN }}          # LINE Access Token
-  #         message: |
-  #           Please review the application 
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: LINE Notify
+        uses: snow-actions/line-notify@v1.1.0
+        with:
+          access_token: ${{ secrets.LINE_ACCESS_TOKEN }}          # LINE Access Token
+          message: |
+            Please review the application 
           
-  #     - uses: trstringer/manual-approval@v1
-  #       with:
-  #         secret: ${{ secrets.GITHUB_TOKEN }}
-  #         approvers: nyshaa
-  #         minimum-approvals: 1
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: nyshaa
+          minimum-approvals: 1
 
 
   # deploy production:
